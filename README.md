@@ -47,27 +47,27 @@ This will extract information from the SSL certificate of the given server.
 ## Example Output
 
 ```bash
-[i] Dominios / subdominios encontrados: 
+[i] Domains / subdomains found: 
 	+ api.example.com
 	+ example.com
 
-[i] Correos electrónicos encontrados: 
+[i] Email addresses found: 
 	+ admin@example.com
 	+ support@example.com
 
-[i] Direcciones ip encontrados: 
-	! NO se han encontrado direcciones IP
+[i] Ip addresses found: 
+	! NO IP addresses found
 
-[i] Paises encontrados: 
+[i] Countries found: 
 	+ US
 
-[i] Provincias encontrados: 
+[i] Provinces found: 
 	+ California
 
-[i] Localidades encontrados: 
+[i] Locations found: 
 	+ San Francisco
 
-[i] Fecha de expiración encontrados: 
+[i] Expiration date found: 
 	+ May 24 19:54:56 2031 GMTT
 ```
 
