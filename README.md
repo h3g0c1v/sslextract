@@ -1,6 +1,6 @@
 # SSL Extract
 
-**sslextract** is a Python tool that extracts key information from SSL certificates, such as domains, emails, IP addresses, and expiration dates, using `openssl`.
+**sslextract** is a Python tool that extracts key information from SSL certificates, such as domains, emails, IP addresses, and expiration dates, using `openssl`. SSL Extract is a tool designed to simplify the auditing and analysis of SSL certificates. Whether you are assessing a server's security or need to quickly extract key information from a certificate file, SSL Extract provides you with a simple and efficient solution.
 
 ## Features
 
@@ -29,20 +29,31 @@ cd sslextract
 Run the script by providing the target IP and port:
 
 ```bash
-python sslextract.py -i <IP_ADDRESS> -p <PORT>
+python3 sslextract.py -i <IP_ADDRESS> -p <PORT>
+```
+
+You can also analyze certificate files directly for greater flexibility:
+
+```bash
+python3 sslextract.py -f <CERT_FILE>
 ```
 
 ### Example:
 
 ```bash
-python sslextract.py -i 10.10.11.102 -p 443
+python3 sslextract.py -i 10.10.11.102 -p 443
+```
+
+```bash
+python3 sslextract.py -f req.txt
 ```
 
 This will extract information from the SSL certificate of the given server.
 
 ## Options
-- `-i`, `--ip`: Target IP address (required)
-- `-p`, `--port`: Target port (required)
+- `-i`, `--ip`: Target IP address
+- `-p`, `--port`: Target port
+- `-f`, `--file`: Path to cert file
 
 ## Example Output
 
