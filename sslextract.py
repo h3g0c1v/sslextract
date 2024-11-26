@@ -14,13 +14,15 @@ reset = Style.RESET_ALL
 
 # Parameter management
 parser = argparse.ArgumentParser(description="Filtering sensitive information from an SSL certificate")
-parser.add_argument('-i','--ip', type=str, required=True, help='Destination IP address')
-parser.add_argument('-p', '--port', type=int, required=True, help='Destination port')
+parser.add_argument('-i','--ip', type=str, help='Destination IP address')
+parser.add_argument('-p', '--port', type=int, help='Destination port')
+parser.add_argument('-f', '--file', type=str, help='Path to cert file')
 args = parser.parse_args()
 
 # Global variables
 ip = args.ip
 port = args.port
+file = args.file
 
 # Function to validate the IP address
 def validateIP(ip):
@@ -44,6 +46,12 @@ def validatePort(port):
         print(f"\n{white}[{red}ERROR{reset}]: The specified port is NOT valid. It must be between 1 and 65535.")
         exit(1)
 
+# Function to validate if the file provided exist
+def validateFile(file):
+    if not os.path.exists(file):
+        print(f"\n{white}[{red}ERROR{reset}{white}] The file provided does NOT exist")
+        exit(1)
+
 # Check if the openssl command is installed
 def opensslValidate():
     if subprocess.run("which openssl", shell=True, capture_output=True).returncode != 0:
@@ -51,8 +59,12 @@ def opensslValidate():
         exit(1)
 
 # Function to extract information from the SSL certificate
-def obtainCert(ip, port, certFile=".cert.ca.tmp"):
-    command = f"openssl s_client -connect {ip}:{port} </dev/null | openssl x509 -text > {certFile}"
+def obtainCert(ip, port, file, certFile=".cert.ca.tmp"):
+    # Defining the appropriate command depending on whether you have entered a file as a certificate or not 
+    if file is None: # If file is not provided
+        command = f"openssl s_client -connect {ip}:{port} </dev/null | openssl x509 -text > {certFile}"
+    else: # If file is provided
+        command = f"openssl req -in {file} -noout -text > {certFile}"
 
     try:  # Try to obtain the SSL certificate
         subprocess.run(command, shell=True, capture_output=True, text=True, check=True, timeout=10)
@@ -64,7 +76,7 @@ def obtainCert(ip, port, certFile=".cert.ca.tmp"):
         print(f"\n{white}[{red}ERROR{reset}]: The command took too long to respond\n")
 
     except Exception as e:  # If something goes wrong, it will show the corresponding error
-        print(f"\n{white}[{red}ERROR{reset}]: {e}")
+        print(f"\n{white}[{red}ERROR{reset}{white}]: {e}{reset}")
     
     finally:  # Delete the generated file to obtain the certificate
         os.remove(certFile) if os.path.exists(certFile) else ""
@@ -99,12 +111,32 @@ def showExtractInfo(info, text):
 
 # Main function
 if __name__ == '__main__':
-    # Validating correct execution of the code (IP and port provided as parameters)
-    validateIP(ip)
-    validatePort(port)
-    opensslValidate()
 
-    certContent = obtainCert(ip, port)  # Getting the SSL certificate content
+    # Validating correct execution of the code (IP and port or only filename provided as parameters)
+    if ip and port and file:
+        print(f"\n{white}[{red}ERROR{reset}]: You have to provide the IP and port OR a cert file\n")
+        exit(1)
+    elif ip and not port:
+        print(f"\n{white}[{red}ERROR{reset}]: You have to provide the port (-p)\n")
+        parser.print_help()
+        exit(1)
+    elif port and not ip:
+        print(f"\n{white}[{red}ERROR{reset}]: You have to provide the IP (-i)\n")
+        parser.print_help()
+        exit(1)
+    elif not ip and not port and not file:
+        parser.print_help()
+        exit(0)
+
+    validateIP(ip) if ip else "" # IP Validation
+    validatePort(port) if port else "" # Port validation
+    validateFile(file) if file else "" # File validation
+    opensslValidate() # Validate if openssl is installed
+
+    # End of validation
+    # ----------------------------------------------------------------------------------------------
+
+    certContent = obtainCert(ip, port, file)  # Getting the SSL certificate content
     results = extractInfo(certContent)  # Extracting sensitive information from the certificate
 
     # Storing the obtained information and its text in a dictionary for iteration (Purpose: code reuse)
